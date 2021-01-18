@@ -1,9 +1,7 @@
-//
-// Created by nacho on 11/23/2020.
-//
 
-#ifndef HW_08_POLYNOMIAL_H
-#define HW_08_POLYNOMIAL_H
+
+#ifndef POLYNOMIAL_H
+#define POLYNOMIAL_H
 
 
 #include <iostream>
