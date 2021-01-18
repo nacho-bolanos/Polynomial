@@ -47,4 +47,4 @@ private:
 };
 
 
-#endif //HW_08_POLYNOMIAL_H
+#endif //POLYNOMIAL_H
