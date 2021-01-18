@@ -21,9 +21,9 @@ public:
 
     Polynomial& operator+=(const Polynomial& rhs);
 
-    bool operator!=(const Polynomial& rhs);
+    bool operator!=(const Polynomial& rhs) const;
 
-    bool operator==(const Polynomial& rhs);
+    bool operator==(const Polynomial& rhs) const;
 
     Polynomial& operator=(const Polynomial& rhs);
 
