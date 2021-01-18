@@ -143,7 +143,7 @@ Polynomial& Polynomial::operator+=(const Polynomial &rhs) {
     return *this;
 }
 
-bool Polynomial::operator!=(const Polynomial &rhs) {
+bool Polynomial::operator!=(const Polynomial &rhs) const {
     if (this->degree != rhs.degree) {return true;}
     Node *tempPolyRHS = rhs.headPtr;
     Node *tempPolyLHS = this->headPtr;
@@ -158,7 +158,7 @@ bool Polynomial::operator!=(const Polynomial &rhs) {
     return test;
 }
 
-bool Polynomial::operator==(const Polynomial &rhs) {
+bool Polynomial::operator==(const Polynomial &rhs) const {
     if (this->degree != rhs.degree) {return false;}
     Node *tempPolyRHS = rhs.headPtr;
     Node *tempPolyLHS = this->headPtr;
@@ -186,7 +186,7 @@ Polynomial &Polynomial::operator=(const Polynomial &rhs) {
     return *this;
 }
 
-int Polynomial::evaluate(const int &xValue) {
+int Polynomial::evaluate(const int &xValue) const {
     int answer = 0;
     Node *tempPoly = this->headPtr;
     int& lastCoef = this->headPtr->data;
@@ -209,13 +209,6 @@ int Polynomial::evaluate(const int &xValue) {
 }
 
 Polynomial::~Polynomial() {
-//    Node* nextNode;
-//    Node* toRemove = headPtr;
-//    while (toRemove != nullptr) {
-//         nextNode = toRemove->next;
-//         delete toRemove;
-//         toRemove = nextNode;
-//    }
     while (headPtr != nullptr) {
         Node* toRemove = headPtr;
         headPtr = headPtr->next;
