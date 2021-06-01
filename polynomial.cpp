@@ -1,231 +1,230 @@
+#include "polynomial.h"
 
-
-#include "Polynomial.h"
-
-using namespace std;
-
-
-
-Polynomial::Polynomial() {
-    degree = 0;
-    headPtr = new Node(0);
-}
-
-Polynomial::Polynomial(const vector<int>& coef) {
-    Node* temp = new Node(coef[coef.size() - 1]);
-    headPtr = temp;
-    if (coef.size() > 1) {
-        for(int index = (coef.size() - 2); index >= 0; --index) {
-            temp->next = new Node(coef[index]);
-            temp = temp->next;
+bool operator==(const Polynomial& lhs, const Polynomial& rhs) {
+    // If the degrees are not the same then they can't be equal.
+    if (lhs.degree == rhs.degree) {
+        Polynomial::Node* tempL = lhs.head;
+        Polynomial::Node* tempR = rhs.head;
+        // Check if all the values are identical, if not return false;
+        while (tempL && tempR) {
+            if (tempL->data != tempR->data) {
+                return false;
+            }
+            tempL = tempL->next;
+            tempR = tempR->next;
         }
+        return true;
     }
-    cleanup();
-    setDegree();
-}
-
-Polynomial::Polynomial(const Polynomial &rhs) {
-    Node* temp = rhs.headPtr->next;
-    Node* newNode = new Node(rhs.headPtr->data);
-    degree = rhs.degree;
-    headPtr = newNode;
-    while (temp != nullptr) {
-        newNode->next = new Node(temp->data);
-        newNode = newNode->next;
-        temp = temp->next;
-    }
+    return false;
 }
 
 std::ostream& operator<<(std::ostream& os, const Polynomial& rhs) {
-    if (rhs.degree == 0) {
-        os << rhs.headPtr->data;
-    } else {
-        Polynomial tempPoly = rhs;
-        int index = rhs.degree;
-        int* reversedPoly = new int[index];
-        while (tempPoly.headPtr != nullptr) {
-            reversedPoly[index] = tempPoly.headPtr->data;
-            tempPoly.headPtr = tempPoly.headPtr->next;
-            --index;
-        }
-        for (size_t index = 0; index < (rhs.degree + 1); ++index) {
-            if (index == rhs.degree || tempPoly.degree < 1) {os << reversedPoly[index];}
-            else {
-                if (reversedPoly[index] != 0) {
-                    if (reversedPoly[index] != 1) {
-                        if (tempPoly.degree == 1) {os << reversedPoly[index] << "x";}
-                        else {os << reversedPoly[index] << "x^" << tempPoly.degree;}
-                    }
-                    if (reversedPoly[index] == 1) {
-                        os << "x";
-                        if (tempPoly.degree > 1) {os << "^" << tempPoly.degree;}
-                    }
-                    os << " + ";
-                }
-            }
-            --tempPoly.degree;
-        }
+    // If the polynomial is a zero polynomial only print the value.
+    if (rhs.head->next == nullptr) {
+        os << rhs.head->data;
+        return os;
     }
+    Polynomial::Node* tempHead = rhs.head;
+    int tempDegree = rhs.degree;
+    // Not printing the last item.
+    while(tempHead->next) {
+        // Not printing values of 0.
+        if (tempHead->data != 0) {
+            // Not printing the 1. i.e. 1x -> x.
+            if (tempHead->data != 1) {
+                os << tempHead->data;
+            }
+            os << "x";
+            // If the degree is larger than one print a degree.
+            if (tempDegree > 1) {
+                os << "^" << tempDegree;
+            }
+            // Test for the sign.
+            if (tempHead->next->data >= 0) {
+                os << " + ";
+            }
+        }  
+        --tempDegree;
+        tempHead = tempHead->next;
+    }
+    // Printing the final element.
+    os << tempHead->data;
     return os;
 }
 
-void Polynomial::setDegree(){
-    int newDegree = 0;
-    Node* tempHeadPTR = this->headPtr;
-    while (tempHeadPTR->next != nullptr) {
-        ++newDegree;
-        tempHeadPTR = tempHeadPTR->next;
-    }
-    this->degree = newDegree;
+Polynomial::Polynomial() {
+    head = new Node(0);
+    degree = 0;
 }
 
-Polynomial Polynomial::operator+(const Polynomial& rhs) {
-    Node* tempPolyRHS = rhs.headPtr;
-    Node* tempPolyLHS = this->headPtr;
-    Polynomial newPoly;
-    if (rhs.degree > this->degree) {
-        Node* newData = new Node();
-        newPoly.headPtr = newData;
-        while (tempPolyLHS != nullptr && newData != nullptr) {
-            newData->data = tempPolyRHS->data + tempPolyLHS->data;
-            tempPolyLHS = tempPolyLHS->next;
-            tempPolyRHS = tempPolyRHS->next;
-            newData->next = new Node();
-            newData = newData->next;
-        }
-        while (tempPolyRHS != nullptr && newData != nullptr) {
-            newData->data = tempPolyRHS->data;
-            tempPolyRHS = tempPolyRHS->next;
-            newData->next = new Node();
-            newData = newData->next;
-        }
-    } else {
-        Node* newData = new Node();
-        newPoly.headPtr = newData;
-        while (tempPolyRHS != nullptr && newData != nullptr) {
-            newData->data = tempPolyRHS->data + tempPolyLHS->data;
-            tempPolyLHS = tempPolyLHS->next;
-            tempPolyRHS = tempPolyRHS->next;
-            newData->next = new Node();
-            newData = newData->next;
-        }
-        while (tempPolyLHS != nullptr && newData != nullptr) {
-            newData->data = tempPolyLHS->data;
-            tempPolyLHS = tempPolyLHS->next;
-            newData->next = new Node();
-            newData = newData->next;
-        }
+Polynomial::Polynomial(const std::vector<int> nums) : degree(nums.size() - 1) {
+    // Get the index where the first non-zero element is.
+    int count = 0;
+    while (nums[count] == 0) {
+        ++count;
     }
-    newPoly.cleanup();
-    newPoly.setDegree();
-    return newPoly;
+    Node* tempHead = new Node(nums[count]);
+    head = tempHead;
+    // Get the new degree.
+    degree -= count;
+    for(size_t index = count + 1; index < nums.size(); ++index) {
+        tempHead->next = new Node(nums[index]);
+        tempHead = tempHead->next;
+    }
 }
 
-Polynomial& Polynomial::operator+=(const Polynomial &rhs) {
-    Node *tempPolyRHS = rhs.headPtr;
-    Node *tempPolyLHS = this->headPtr;
-    if (rhs.degree > this->degree) {
-        while (tempPolyLHS != nullptr) {
-            tempPolyRHS->data += tempPolyLHS->data;
-            tempPolyLHS = tempPolyLHS->next;
-            tempPolyRHS = tempPolyRHS->next;
+Polynomial& Polynomial::operator+=(const Polynomial& rhs) {
+    Node* tempL = head;
+    Node* tempR = rhs.head;
+    int dif = 0;
+    int shared = degree;
+    // If the left side is empty, fill the left Polynomial with the values from the right.
+    if (degree == 0 && rhs.degree != 0) {
+        tempL = new Node(tempR->data);
+        head = tempL;
+        while (tempR->next) {
+            tempL->next = new Node(tempR->next->data);
+            tempL = tempL->next;
+            tempR = tempR->next;
         }
-        this->headPtr = tempPolyRHS;
-    } else {
-        while (tempPolyRHS != nullptr) {
-            tempPolyLHS->data += tempPolyRHS->data;
-            tempPolyLHS = tempPolyLHS->next;
-            tempPolyRHS = tempPolyRHS->next;
+        degree = rhs.degree;
+        return *this;
+    }
+    // If the left polynomial is larger than the right just move the left until 
+    // the polynomial degree's match.
+    if (degree > rhs.degree) {
+        dif = degree - rhs.degree;
+        shared = rhs.degree;
+        while (dif > 0) {
+            tempL = tempL->next;
+            --dif;
         }
     }
-    setDegree();
+    // If the right polynomial is larger than the left, then insert the bigger degree values
+    // in front of the left polynomial. Until the right and the left have the same degree.
+    else if (degree < rhs.degree) {
+        dif = rhs.degree - degree;
+        Node* remaining = tempL;
+        tempL = new Node(tempR->data);
+        head = tempL;
+        while (dif > 1) {
+            tempL->next = new Node(tempR->next->data);
+            tempL = tempL->next;
+            tempR = tempR->next;
+            --dif;
+        }
+        if (degree > 0) {
+            tempL->next = remaining;
+            tempL = tempL->next;
+        }
+        tempR = tempR->next;
+    }
+    // Add the right polynomial to the left polynomial.
+    while (shared >= 0 && degree > 0) {
+        tempL->data += tempR->data;
+        tempL = tempL->next;
+        tempR = tempR->next;
+        --shared;
+    } 
+    // Change the degree.
+    if (degree < rhs.degree) {
+        degree = rhs.degree;
+    }
     cleanup();
     return *this;
 }
 
-bool Polynomial::operator!=(const Polynomial &rhs) const {
-    if (this->degree != rhs.degree) {return true;}
-    Node *tempPolyRHS = rhs.headPtr;
-    Node *tempPolyLHS = this->headPtr;
-    bool test = false;
-    while (tempPolyLHS != nullptr && tempPolyRHS != nullptr) {
-        if (tempPolyRHS->data != tempPolyLHS->data) {
-            test = true;
-        }
-        tempPolyLHS = tempPolyLHS->next;
-        tempPolyRHS = tempPolyRHS->next;
-    }
-    return test;
-}
-
-bool Polynomial::operator==(const Polynomial &rhs) const {
-    if (this->degree != rhs.degree) {return false;}
-    Node *tempPolyRHS = rhs.headPtr;
-    Node *tempPolyLHS = this->headPtr;
-    bool test = false;
-    while (tempPolyLHS != nullptr && tempPolyRHS != nullptr) {
-        if (tempPolyRHS->data == tempPolyLHS->data) {
-            test = true;
-        }
-        tempPolyLHS = tempPolyLHS->next;
-        tempPolyRHS = tempPolyRHS->next;
-    }
-    return test;
-}
-
-Polynomial &Polynomial::operator=(const Polynomial &rhs) {
-    Node* temp = rhs.headPtr->next;
-    Node* newNode = new Node(rhs.headPtr->data);
+Polynomial::Polynomial(const Polynomial& rhs) : degree(rhs.degree) {
+    Node* tempHead = new Node(rhs.head->data);
+    head = tempHead;
+    Node* temprhs = rhs.head;
     degree = rhs.degree;
-    headPtr = newNode;
-    while (temp != nullptr) {
-        newNode->next = new Node(temp->data);
-        newNode = newNode->next;
-        temp = temp->next;
+    // Add the values to the next Node of the polynomial.
+    while (temprhs->next) {
+        tempHead->next = new Node(temprhs->next->data);
+        tempHead = tempHead->next;
+        temprhs = temprhs->next;
+    }
+}
+
+Polynomial& Polynomial::operator=(const Polynomial& rhs) {
+    Node* temp = head;
+    // Delete the current polynomial.
+    while (temp) {
+       Node* deleteN = temp;
+       temp = temp->next;
+       delete deleteN;
+    }
+    // Copy the new node.
+    Node* tempHead = new Node(rhs.head->data);
+    head = tempHead;
+    Node* temprhs = rhs.head;
+    degree = rhs.degree;
+    while (temprhs->next) {
+        tempHead->next = new Node(temprhs->next->data);
+        tempHead = tempHead->next;
+        temprhs = temprhs->next;
     }
     return *this;
 }
 
-int Polynomial::evaluate(const int &xValue) const {
-    int answer = 0;
-    Node *tempPoly = this->headPtr;
-    int& lastCoef = this->headPtr->data;
-    int tempDegree = 1;
-    while (tempPoly != nullptr) {
-        if (&tempPoly->data == &lastCoef) {
-            answer += tempPoly->data;
-        }
-        else {
-            int coefVal = xValue;
-            for (int mult = 2; mult <= tempDegree; mult++) {
-                coefVal *= xValue;
-            }
-            answer += tempPoly->data * coefVal;
-            ++tempDegree;
-        }
-        tempPoly = tempPoly->next;
+Polynomial::~Polynomial() {
+    Node* temp = head;
+    // Loop through the linked list and delete the values;
+    while (temp) {
+       Node* deleteN = temp;
+       temp = temp->next;
+       delete deleteN;
     }
+}
+
+int Polynomial::evaluate(const int& x) const {
+    int answer = 0;
+    int tempDegree = degree;
+    Node* tempPoly = head;
+    // Check if the polynomial is not a zero polynomial.
+    while (tempDegree > 0) {
+        int exponent = x;
+        // Exponent function.
+        for(int num = 0; num < tempDegree - 1; ++num) {
+            exponent *= x;
+        }
+        answer += tempPoly->data * exponent;
+        tempPoly = tempPoly->next;
+        --tempDegree;
+    }
+    answer += tempPoly->data;
     return answer;
 }
 
-Polynomial::~Polynomial() {
-    while (headPtr != nullptr) {
-        Node* toRemove = headPtr;
-        headPtr = headPtr->next;
-        delete toRemove;
-    }
-    degree = 0;
+Polynomial operator+(const Polynomial& lhs, const Polynomial& rhs) {
+    Polynomial newP;
+    newP += lhs;
+    newP += rhs;
+    return newP;
 }
 
-void Polynomial::cleanup() const {
-    Node* tempNode = headPtr;
-    Node* realLeadingCoef;
-    while (tempNode!= nullptr) {
-        if (tempNode->data != 0) {
-            realLeadingCoef = tempNode;
+bool operator!=(const Polynomial& lhs, const Polynomial& rhs) {
+    return !(lhs == rhs);
+}
+
+void Polynomial::cleanup() {
+    Node* tempH = head;
+    int count = 0;
+    // Find the first non-zero coefficient.
+    while (tempH) {
+        ++count;
+        if (tempH->data != 0) {
+            head = tempH;
+            break;
         }
-        tempNode = tempNode->next;
+        tempH = tempH->next;
     }
-    delete realLeadingCoef->next;
-    realLeadingCoef->next = nullptr;
+    degree = 0;
+    tempH = head->next;
+    // Get the new degree.
+    while (tempH) {
+        ++degree;
+        tempH = tempH->next;
+    }
 }
