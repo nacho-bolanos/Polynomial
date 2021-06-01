@@ -148,6 +148,9 @@ Polynomial::Polynomial(const Polynomial& rhs) : degree(rhs.degree) {
 }
 
 Polynomial& Polynomial::operator=(const Polynomial& rhs) {
+    if (*this == rhs) {
+        return *this;
+    }
     Node* temp = head;
     // Delete the current polynomial.
     while (temp) {
