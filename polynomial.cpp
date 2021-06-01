@@ -57,7 +57,7 @@ Polynomial::Polynomial() {
     degree = 0;
 }
 
-Polynomial::Polynomial(const std::vector<int> nums) : degree(nums.size() - 1) {
+Polynomial::Polynomial(const std::vector<int>& nums) : degree(nums.size() - 1) {
     // Get the index where the first non-zero element is.
     int count = 0;
     while (nums[count] == 0) {
