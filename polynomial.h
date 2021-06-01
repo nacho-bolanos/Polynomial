@@ -13,7 +13,7 @@ class Polynomial {
     public:
         Polynomial();
 
-        Polynomial(const std::vector<int> nums);
+        Polynomial(const std::vector<int>& nums);
 
         Polynomial& operator+=(const Polynomial& rhs);
 
